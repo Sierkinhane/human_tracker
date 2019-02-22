@@ -1,4 +1,5 @@
 
+
 """
   author: Sierkinhane
   since: 2019-2-17 15:03:22
@@ -8,9 +9,7 @@ import cv2
 import numpy as np
 import time
 
-frame_rate_ratio = 1
-input_video = "videos/joketv.mp4"
-output_video = "videos/outputs/" + input_video.split('/')[-1]
+
 from torchvision import transforms
 import cv2
 import math
@@ -155,35 +154,43 @@ class Tracker(object):
 
         imgs = []
         ori = img
+
         if self.counter != 0:
             self.iou_fillter()
 
-        for bbx in self.suspected_bbx:
-            img = ori[int(bbx[1]):int(bbx[3]), int(bbx[0]):int(bbx[2]), :]
-            img = self.normalization(img, resize=True)
+        if self.counter == 0:
+            query_img = cv2.imread(query)
+            query_img = self.normalization(query_img, resize=True)
 
-            img = torch.from_numpy(img.transpose(2, 0, 1)).unsqueeze(0)
-            imgs.append(img)
-            # img = self.transform_for_infer(self.infer_shape)(img)
-            # imgs.append(img.unsqueeze(0))
+            query_img = torch.from_numpy(query_img.transpose(2, 0, 1)).unsqueeze(0)
+            query_img = query_img.to(self.device)
+            _, embeddings = model(query_img)
+            embeddings = embeddings.cpu().detach().numpy()
+            self.target_vector_buffer[self.bufferPointer, :] = embeddings
+            self.bufferPointer += 1
 
-        if len(imgs) != 0:
-            imgs = torch.cat(imgs, 0)
-            imgs = imgs.to(self.device)
-            # print(imgs.shape)
-            # tic = time.time()
-            _, embeddings = model(imgs)
-            # toc = time.time()
-            # print(toc-tic)
-            embeddings = embeddings.cpu().detach().numpy() # (3, 512)
+            # self.target_bbx = np.append(self.target_bbx, self.suspected_bbx[0])
+            self.counter = 1
+        else:
 
-            if self.counter == 0:
-                self.target_vector_buffer[self.bufferPointer, :] = embeddings[0, :]
-                self.bufferPointer += 1
+            for bbx in self.suspected_bbx:
+                img = ori[int(bbx[1]):int(bbx[3]), int(bbx[0]):int(bbx[2]), :]
+                img = self.normalization(img, resize=True)
 
-                self.target_bbx = np.append(self.target_bbx, self.suspected_bbx[0])
-                self.counter = 1
-            else:
+                img = torch.from_numpy(img.transpose(2, 0, 1)).unsqueeze(0)
+                imgs.append(img)
+                # img = self.transform_for_infer(self.infer_shape)(img)
+                # imgs.append(img.unsqueeze(0))
+
+            if len(imgs) != 0:
+                imgs = torch.cat(imgs, 0)
+                imgs = imgs.to(self.device)
+                # print(imgs.shape)
+                # tic = time.time()
+                _, embeddings = model(imgs)
+                # toc = time.time()
+                # print(toc-tic)
+                embeddings = embeddings.cpu().detach().numpy() # (3, 512)
 
                 distance = np.zeros((1, len(self.suspected_bbx))) # (1, 3) 3--bbox 10--vector buffer
                 if self.bufferPointer < 9:
@@ -203,7 +210,7 @@ class Tracker(object):
                 # 2. 找到空间距离最小的bbox
                 index = np.argmin(distance[0])
                 if self.way2:
-                    if distance[0][index] < 0.5:
+                    if distance[0][index] < 0.6:
                         if self.bufferPointer > 9:
                             self.bufferPointer = 0
 
@@ -289,6 +296,11 @@ class Tracker(object):
 
 if __name__ == "__main__":
 
+    frame_rate_ratio = 1
+    input_video = "videos/joketv.mp4"
+    query = "videos/q1.png"
+    output_video = "videos/outputs/" + input_video.split('/')[-1]
+
     tracker = Tracker()
     model_d = tracker.getHFDModel()
     model_c = tracker.getCenterModel()
@@ -297,7 +309,7 @@ if __name__ == "__main__":
     input_fps = cap.get(cv2.CAP_PROP_FPS)
     ret_val, frame = cap.read()
     video_length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    ending_frame = 400
+    ending_frame = 1000
     output_fps = input_fps / 1
 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
