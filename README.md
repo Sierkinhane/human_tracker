@@ -3,6 +3,7 @@
 * center-loss https://github.com/louis-she/center-loss.pytorch
 
 ## demo 
+* download yolov3 and centerloss weights. ![]
 * python tracking.py the output will be stored in videos/output
 
 ## train center loss
