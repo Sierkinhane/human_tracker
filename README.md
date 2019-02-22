@@ -3,7 +3,7 @@
 * center-loss https://github.com/louis-she/center-loss.pytorch
 
 ## performance
-* 
+* https://www.bilibili.com/video/av44360925
 
 ## demo 
 * download yolov3 and centerloss weights. https://pan.baidu.com/s/1ECT_CA8UlgsMlzvBcVwr2w pw:om7k 
