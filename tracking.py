@@ -50,7 +50,7 @@ class Tracker(object):
         # replay embedded vector buffer: store 10 timestep of embedded vector of target
         self.target_vector_buffer = np.zeros((10, 512))
         self.target_bbx = np.array([])
-        self.bufferSize = 10
+        self.bufferSize = 20
         self.bufferPointer = 0
         self.counter = 0
         self.way2 = True
@@ -193,7 +193,7 @@ class Tracker(object):
                 embeddings = embeddings.cpu().detach().numpy() # (3, 512)
 
                 distance = np.zeros((1, len(self.suspected_bbx))) # (1, 3) 3--bbox 10--vector buffer
-                if self.bufferPointer < 9:
+                if self.bufferPointer < 19:
                     for i in range(self.bufferPointer):
                         distance += np.sum((embeddings - np.expand_dims(self.target_vector_buffer[i, :], axis=0))**2, axis=1)
                     distance /= self.bufferPointer
@@ -211,7 +211,7 @@ class Tracker(object):
                 index = np.argmin(distance[0])
                 if self.way2:
                     if distance[0][index] < 0.6:
-                        if self.bufferPointer > 9:
+                        if self.bufferPointer > 19:
                             self.bufferPointer = 0
 
                         self.target_vector_buffer[self.bufferPointer, :] = embeddings[index, :]
@@ -227,7 +227,7 @@ class Tracker(object):
                         self.way2 = False
                 else:
                     if distance[0][index] < 0.4:
-                        if self.bufferPointer > 9:
+                        if self.bufferPointer > 19:
                             self.bufferPointer = 0
                         self.target_vector_buffer[self.bufferPointer, :] = embeddings[index, :]
                         self.bufferPointer += 1
