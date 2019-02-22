@@ -50,7 +50,7 @@ def train(model, dataloader, device):
 
 if __name__ == '__main__':
     
-    dataset = Data(data_dir='D:/00-Data/MARS/Market-1501-v15.09.15/Market-1501-v15.09.15/train_for_center_loss_market_cuhk')
+    dataset = Data(data_dir='./train_data/train_for_center_loss_market_cuhk')
 
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     dataloader, num_classes = dataset.getDataloader(batch_size=BATCH_SIZE, num_workers=NUM_WORKERS, shuffle=SHUFFLE)
