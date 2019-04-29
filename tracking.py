@@ -211,7 +211,7 @@ class Tracker(object):
                 index = np.argmin(distance[0])
                 if self.way2:
                     if distance[0][index] < 0.6:
-                        if self.bufferPointer > 19:
+                        if self.bufferPointer > 9:
                             self.bufferPointer = 0
 
                         self.target_vector_buffer[self.bufferPointer, :] = embeddings[index, :]
@@ -227,7 +227,7 @@ class Tracker(object):
                         self.way2 = False
                 else:
                     if distance[0][index] < 0.4:
-                        if self.bufferPointer > 19:
+                        if self.bufferPointer > 9:
                             self.bufferPointer = 0
                         self.target_vector_buffer[self.bufferPointer, :] = embeddings[index, :]
                         self.bufferPointer += 1
