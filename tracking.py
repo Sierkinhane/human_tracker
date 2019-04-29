@@ -50,7 +50,7 @@ class Tracker(object):
         # replay embedded vector buffer: store 10 timestep of embedded vector of target
         self.target_vector_buffer = np.zeros((10, 512))
         self.target_bbx = np.array([])
-        self.bufferSize = 20
+        self.bufferSize = 10
         self.bufferPointer = 0
         self.counter = 0
         self.way2 = True
